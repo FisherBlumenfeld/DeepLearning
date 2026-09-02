@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submission: {{ hw_name }}</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface-alt: #f1f5f9;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --code-bg: #ffffff;
+            --badge-bg: #e2e8f0;
+            --badge-text: #334155;
+            --radius: 8px;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0b0f19;
+                --surface: #131b2e;
+                --surface-alt: #1e293b;
+                --border: #334155;
+                --border-hover: #475569;
+                --text: #f8fafc;
+                --text-muted: #94a3b8;
+                --primary: #3b82f6;
+                --primary-hover: #60a5fa;
+                --primary-light: #1e3a8a;
+                --code-bg: #0f172a;
+                --badge-bg: #1e293b;
+                --badge-text: #cbd5e1;
+            }
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .header-info h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 0.35rem;
+        }
+
+        .author-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            color: var(--text);
+            margin-bottom: 0.6rem;
+        }
+
+        .author-tag {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .email-tag {
+            font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .meta-tag {
+            display: inline-flex;
+            align-items: center;
+            background: var(--surface-alt);
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.875rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            transition: all 0.15s ease;
+        }
+
+        .btn:hover {
+            background: var(--surface-alt);
+            border-color: var(--border-hover);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        /* Navigation / TOC */
+        .toc-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .toc-panel h2 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 0.65rem;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.8125rem;
+            transition: all 0.15s ease;
+        }
+
+        .toc-link:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .toc-link code {
+            font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.8125rem;
+        }
+
+        .toc-badge {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Section Headings */
+        .section-header {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+        }
+
+        /* File Cards */
+        .file-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: border-color 0.15s ease;
+        }
+
+        .file-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        summary, .file-summary {
+            list-style: none !important;
+        }
+
+        summary::-webkit-details-marker, .file-summary::-webkit-details-marker {
+            display: none !important;
+        }
+
+        summary::marker, .file-summary::marker {
+            display: none !important;
+            content: "" !important;
+        }
+
+        .file-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            list-style: none !important;
+        }
+
+        .file-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 0;
+            line-height: 1.5;
+            white-space: nowrap;
+        }
+
+        .chevron {
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-right: 2px solid var(--text-muted);
+            border-bottom: 2px solid var(--text-muted);
+            transform: rotate(-45deg);
+            transition: transform 0.2s ease;
+            margin-right: 2px;
+            flex-shrink: 0;
+        }
+
+        details[open] > .file-summary .chevron {
+            transform: rotate(45deg);
+        }
+
+        .file-name {
+            font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .badges-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 9999px;
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            white-space: nowrap;
+        }
+
+        .badge-plot {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-md {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .badge-md {
+                background: #78350f;
+                color: #fde68a;
+            }
+        }
+
+        /* Markdown rendering */
+        .markdown-body {
+            padding: 1.5rem 2rem;
+            background: var(--surface);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 0.9375rem;
+            line-height: 1.65;
+        }
+
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3,
+        .markdown-body h4 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text);
+        }
+
+        .markdown-body h1 {
+            font-size: 1.35rem;
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .markdown-body h2 {
+            font-size: 1.15rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .markdown-body h3 {
+            font-size: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .markdown-body h1:first-child,
+        .markdown-body h2:first-child {
+            margin-top: 0;
+        }
+
+        .markdown-body hr {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 1.25rem 0;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            padding-left: 1.75rem;
+        }
+
+        .markdown-body li + li {
+            margin-top: 0.25rem;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid var(--primary);
+            padding: 0.5rem 1rem;
+            color: var(--text-muted);
+            background: var(--surface-alt);
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            margin: 1rem 0;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            border: 1px solid var(--border);
+            padding: 0.6rem 0.85rem;
+            text-align: left;
+        }
+
+        .markdown-body th {
+            background: var(--surface-alt);
+            font-weight: 600;
+        }
+
+        .markdown-body tr:nth-child(even) {
+            background: var(--surface-alt);
+        }
+
+        .markdown-body :not(pre) > code {
+            font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85em;
+            background: var(--surface-alt);
+            padding: 0.15em 0.35em;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .markdown-body pre code,
+        .highlight pre code,
+        pre code {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .markdown-body .highlight {
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+            background: #ffffff !important;
+        }
+
+        /* Code display */
+        .file-content {
+            background: #ffffff !important;
+            overflow-x: auto;
+            font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.8125rem;
+            line-height: 1.55;
+        }
+
+        .highlight {
+            background: #ffffff !important;
+            padding: 0.75rem 0;
+        }
+
+        .highlight pre {
+            background: #ffffff !important;
+            margin: 0;
+            padding: 0 1rem;
+            white-space: pre;
+            word-wrap: normal;
+        }
+
+        .linenos {
+            color: var(--text-muted);
+            opacity: 0.6;
+            margin-right: 1.25rem;
+            user-select: none;
+            display: inline-block;
+            min-width: 2.25rem;
+            text-align: right;
+        }
+
+        /* Artifacts & SVGs */
+        .artifact-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .artifact-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .artifact-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .artifact-name {
+            font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.875rem;
+        }
+
+        .svg-container {
+            padding: 1.5rem;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto;
+        }
+
+        .svg-container svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Pygments Syntax Theme Integration */
+        {{ pygments_css | safe }}
+
+        /* Ensure code backgrounds remain pure white even after Pygments theme rules */
+        .highlight, .highlight pre, .file-content, .markdown-body .highlight, code, pre {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+
+        /* Print Media Stylesheet */
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.9in 0.5in 0.65in 0.5in;
+                @top-left {
+                    content: "ECE472 \2022  {{ hw_name | escape_css }}";
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    font-size: 8pt;
+                    font-weight: 600;
+                    line-height: 1.6;
+                    color: #475569;
+                    vertical-align: bottom;
+                }
+                @top-right {
+                    content: "{{ author_name | escape_css }} <{{ author_email | escape_css }}>";
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    font-size: 8pt;
+                    font-weight: 600;
+                    line-height: 1.6;
+                    color: #475569;
+                    vertical-align: bottom;
+                }
+                @bottom-left {
+                    content: "Generated: {{ timestamp | escape_css }}";
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    font-size: 7.5pt;
+                    line-height: 1.5;
+                    color: #94a3b8;
+                }
+                @bottom-right {
+                    content: "Page " counter(page) " of " counter(pages);
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    font-size: 7.5pt;
+                    line-height: 1.5;
+                    color: #94a3b8;
+                }
+            }
+
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                font-size: 9pt !important;
+            }
+
+            .container {
+                max-width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .no-print, .toolbar, .toc-panel, .btn {
+                display: none !important;
+            }
+
+            .header {
+                background: #ffffff !important;
+                border: 1px solid #999999 !important;
+                box-shadow: none !important;
+                padding: 1rem !important;
+                margin-bottom: 1rem !important;
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+
+            .section-header {
+                page-break-after: avoid;
+                break-after: avoid;
+                font-size: 11pt !important;
+                margin-top: 1.5rem !important;
+            }
+
+            details.file-card {
+                display: block !important;
+                background: #ffffff !important;
+                border: 1px solid #cccccc !important;
+                box-shadow: none !important;
+                margin-bottom: 1rem !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            details.file-card summary, .file-summary {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                border-bottom: 1px solid #cccccc !important;
+                cursor: default !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+                list-style: none !important;
+            }
+
+            .file-title, .file-name, .badges-group, .badge {
+                white-space: nowrap !important;
+            }
+
+            .badges-group {
+                flex-shrink: 0 !important;
+            }
+            details.file-card .chevron, .chevron {
+                display: none !important;
+            }
+
+            details.file-card .file-content {
+                display: block !important;
+                background: #ffffff !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .file-content, .highlight, .highlight pre, .markdown-body, .markdown-body .highlight, code, pre {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+            }
+
+            .highlight {
+                padding: 0.5rem 0 !important;
+            }
+
+            .highlight pre {
+                white-space: pre-wrap !important;
+                word-break: break-all !important;
+                font-size: 8pt !important;
+                line-height: 1.4 !important;
+            }
+
+            .linenos {
+                color: #888888 !important;
+                opacity: 1 !important;
+            }
+
+            .markdown-body {
+                padding: 0.75rem 1rem !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 8.5pt !important;
+            }
+
+            .markdown-body table th {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .markdown-body tr:nth-child(even) {
+                background: #ffffff !important;
+            }
+
+            .markdown-body blockquote {
+                background: #ffffff !important;
+                border-left-color: #666666 !important;
+                color: #333333 !important;
+            }
+            .markdown-body :not(pre) > code {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+
+            .markdown-body pre code,
+            .highlight pre code,
+            pre code {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+            }
+
+            .markdown-body .highlight {
+                border: 1px solid #cccccc !important;
+                border-radius: 4px !important;
+                margin: 0.75rem 0 !important;
+                background: #ffffff !important;
+            }
+            .artifact-card {
+                display: block !important;
+                background: #ffffff !important;
+                border: 1px solid #cccccc !important;
+                box-shadow: none !important;
+                margin-bottom: 1.5rem !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .artifact-header {
+                background: #ffffff !important;
+                color: #000000 !important;
+                border-bottom: 1px solid #cccccc !important;
+            }
+
+            .svg-container {
+                padding: 1rem !important;
+                background: #ffffff !important;
+            }
+
+            .svg-container svg {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-info">
+                <h1>Submission: {{ hw_name }}</h1>
+                <div class="author-meta">
+                    <span class="author-tag">{{ author_name }}</span>
+                    <span class="email-tag">&lt;{{ author_email }}&gt;</span>
+                </div>
+                <div class="meta">
+                    <span class="meta-tag">{{ source_files | length }} Source Files</span>
+                    <span class="meta-tag">{{ svg_artifacts | length }} Plots</span>
+                    <span class="meta-tag">{{ total_lines }} Lines</span>
+                    <span>Generated: {{ timestamp }}</span>
+                </div>
+            </div>
+            <div class="toolbar no-print">
+                <button type="button" class="btn" onclick="toggleAllCards(true)" title="Expand all file cards">
+                    Expand All
+                </button>
+                <button type="button" class="btn" onclick="toggleAllCards(false)" title="Collapse all file cards">
+                    Collapse All
+                </button>
+                <button type="button" class="btn btn-primary" onclick="window.print()" title="Print to PDF or paper">
+                    Print / Save PDF
+                </button>
+            </div>
+        </header>
+
+        <nav class="toc-panel no-print">
+            <h2>Source &amp; Configuration Index</h2>
+            <div class="toc-grid">
+                {% for file in source_files %}
+                <a href="#{{ file.id }}" class="toc-link">
+                    <code>{{ file.path }}</code>
+                    <span class="toc-badge">{{ file.toc_badge }}</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% if svg_artifacts %}
+            <h2 style="margin-top: 1rem;">Artifacts &amp; Plots</h2>
+            <div class="toc-grid">
+                {% for art in svg_artifacts %}
+                <a href="#{{ art.id }}" class="toc-link">
+                    <code>{{ art.path }}</code>
+                    <span class="toc-badge">SVG Plot</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </nav>
+
+        <main>
+            <h2 class="section-header">Source Code &amp; Configuration</h2>
+            {% for file in source_files %}
+            <details class="file-card" id="{{ file.id }}" open>
+                <summary class="file-summary">
+                    <span class="file-title">
+                        <span class="chevron"></span>
+                        <span class="file-name">{{ file.path }}</span>
+                    </span>
+                    <span class="badges-group">
+                        {% if file.is_markdown %}
+                        <span class="badge badge-md">Markdown</span>
+                        {% endif %}
+                        <span class="badge">{{ file.line_count }} line{{ 's' if file.line_count != 1 else '' }}</span>
+                    </span>
+                </summary>
+                {% if file.is_markdown %}
+                <div class="file-content markdown-body">
+                    {{ file.rendered_content | safe }}
+                </div>
+                {% else %}
+                <div class="file-content">
+                    {{ file.rendered_content | safe }}
+                </div>
+                {% endif %}
+            </details>
+            {% endfor %}
+
+            {% if svg_artifacts %}
+            <h2 class="section-header">Artifacts &amp; Generated Vector Plots</h2>
+            {% for art in svg_artifacts %}
+            <div class="artifact-card" id="{{ art.id }}">
+                <div class="artifact-header">
+                    <span class="artifact-title">
+                        <span class="artifact-name">{{ art.path }}</span>
+                    </span>
+                    <span class="badge badge-plot">Vector SVG</span>
+                </div>
+                <div class="svg-container">
+                    {{ art.cleaned_svg | safe }}
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        function toggleAllCards(expand) {
+            const cards = document.querySelectorAll('details.file-card');
+            cards.forEach(card => {
+                card.open = expand;
+            });
+        }
+
+        window.addEventListener('beforeprint', () => {
+            toggleAllCards(true);
+        });
+    </script>
+</body>
+</html>

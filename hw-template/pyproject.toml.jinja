@@ -1,0 +1,31 @@
+# pyproject.toml.jinja
+
+[project]
+name = "{{ project_name }}"
+version = "0.1.0"
+description = "{{ project_description }}"
+readme = "README.md"
+authors = [
+    { name = "{{ author_name }}", email = "{{ author_email }}" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "structlog",
+    "rich",
+    "numpy",
+    "pydantic",
+    "pydantic-settings>=2.10.1",
+    "matplotlib>=3.10.5",
+    "tqdm>=4.67.1",
+    "jax[cpu]>=0.7.1",
+    "flax>=0.11.2",
+    "optax>=0.2.4",
+    "scikit-learn",
+]
+
+[project.scripts]
+{{ project_name }} = "{{ project_name }}:main"
+{{ project_name }}-evaluate = "{{ project_name }}.evaluate:main"
+[build-system]
+requires = ["uv_build>=0.8.3,<0.9.0"]
+build-backend = "uv_build"
