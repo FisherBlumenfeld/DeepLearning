@@ -1,0 +1,20 @@
+debug = false
+random_seed = 0xc61dd8fc
+
+[data]
+num_features = 1
+num_samples = 50
+sigma_noise = 0.1 #default 0.5
+
+[training]
+batch_size = 16
+num_iters = 30000 #default 300
+learning_rate = 0.0001 #default .01
+num_gaussians = 8
+
+#best so far: loss = 0.0018 @ 30k iters, 1e-4 learning_rate, num_gaussians = 6
+
+[plotting]
+output_dir = "artifacts"
+figsize = [5, 3]
+dpi = 200

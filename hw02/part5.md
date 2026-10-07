@@ -1,0 +1,3 @@
+write a few sentences discussing why models parameterized on Cartesian coordinates fail or struggle to extrapolate rotational periodic structures beyond their training envelope.
+
+The MLP model is only learning an approximation of the relationship present in the training data set, rather than the underlying mathematical rule that generates the spiral pattern. For the data outside the training set, the MLP doesn't know that this data should be related to the data within the set. Additionally, because MLPs construct decision boundaries from the combination of local activation responses, they are unlikely to succeed in extrapolating data far from the region covered by the training set.

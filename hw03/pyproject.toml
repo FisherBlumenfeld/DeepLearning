@@ -1,0 +1,33 @@
+# pyproject.toml.jinja
+
+[project]
+name = "hw03"
+version = "0.1.0"
+description = "My new homework assignment."
+readme = "README.md"
+authors = [
+    { name = "Fisher Blumenfeld", email = "fisher.blumenfeld@cooper.edu" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "structlog",
+    "rich",
+    "numpy",
+    "pydantic",
+    "pydantic-settings>=2.10.1",
+    "matplotlib>=3.10.5",
+    "tqdm>=4.67.1",
+    "jax[cpu]==0.4.38",
+    "flax==0.10.4",
+    "optax>=0.2.4",
+    "scikit-learn",
+    "jaxlib==0.4.38",
+    "pandas>=3.0.6",
+]
+
+[project.scripts]
+hw03 = "hw03:main"
+hw03-evaluate = "hw03.evaluate:main"
+[build-system]
+requires = ["uv_build>=0.8.3,<0.9.0"]
+build-backend = "uv_build"

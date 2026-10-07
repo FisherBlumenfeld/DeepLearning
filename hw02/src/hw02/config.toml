@@ -1,0 +1,17 @@
+debug = false
+random_seed = 0xc61dd8fc
+
+[data]
+num_features = 1
+num_samples = 300
+sigma_noise = 0.4 # this is low to see if graph + data generation worked
+
+[training]
+batch_size = 64
+num_iters = 1000
+learning_rate = 0.02
+
+[plotting]
+output_dir = "artifacts"
+figsize = [5, 5]
+dpi = 200
