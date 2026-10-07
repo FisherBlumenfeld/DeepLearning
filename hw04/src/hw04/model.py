@@ -151,7 +151,7 @@ class ResNetClassifier(nnx.Module):
                 )
                 in_c = out_c
 
-        self.blocks = blocks
+        self.blocks = nnx.List(blocks)
 
         self.head = nnx.Linear(
             in_features=stage_channels[-1],

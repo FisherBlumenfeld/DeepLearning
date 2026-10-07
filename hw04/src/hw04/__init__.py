@@ -38,11 +38,11 @@ def main() -> None:
 
     steps_per_epoch = int(np.ceil(data.num_train / settings.training.batch_size))
     total_steps = EPOCHS * steps_per_epoch
-    warmup_steps = 1 * steps_per_epoch  # 1 epoch linear warmup
+    warmup_steps = 1 * steps_per_epoch 
 
     schedule = optax.warmup_cosine_decay_schedule(
         init_value=1e-5,
-        peak_value=settings.training.learning_rate,  # e.g., 1e-3 or 3e-3
+        peak_value=settings.training.learning_rate,  
         warmup_steps=warmup_steps,
         decay_steps=total_steps,
         end_value=1e-5,

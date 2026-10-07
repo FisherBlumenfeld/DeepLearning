@@ -29,7 +29,7 @@ def train_step(
         return loss, logits
 
     (loss, logits), grads = nnx.value_and_grad(loss_fn, has_aux=True)(model)
-    optimizer.update(grads)  # In-place update of model parameters
+    optimizer.update(model, grads)  # In-place update of model parameters
     acc = jnp.mean(jnp.argmax(logits, axis=-1) == y)
     return acc, loss
 

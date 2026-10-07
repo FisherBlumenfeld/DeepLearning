@@ -17,7 +17,7 @@ dependencies = [
     "pydantic-settings>=2.10.1",
     "matplotlib>=3.10.5",
     "tqdm>=4.67.1",
-    "jax[cpu]>=0.7.1",
+    "jax[cpu,cuda12]>=0.7.1",
     "flax>=0.11.2",
     "optax>=0.2.4",
     "scikit-learn",

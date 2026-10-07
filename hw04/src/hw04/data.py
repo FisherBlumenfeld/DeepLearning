@@ -2,7 +2,13 @@ from dataclasses import InitVar, dataclass, field
 from typing import Literal, Generator
 import numpy as np
 from datasets import load_dataset
+import logging
 
+# Suppress HTTP request logging from urllib3 / requests / huggingface_hub
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
+logging.getLogger("datasets").setLevel(logging.WARNING)
 
 @dataclass
 class Data:
@@ -30,8 +36,8 @@ class Data:
         dataset = load_dataset("uoft-cs/cifar10")
         dataset_np = dataset.with_format("numpy")
 
-        raw_x_training = dataset_np["train"]["img"].astype(np.float32) / 255.0
-        raw_y_training = dataset_np["train"]["label"].astype(np.int32)
+        raw_x_training = np.asarray(dataset_np["train"]["img"], dtype = np.int32) / 255.0
+        raw_y_training = np.asarray(dataset_np["train"]["label"], dtype = np.int32)
 
         total_train_samples = len(raw_x_training)
 
@@ -42,13 +48,13 @@ class Data:
         self.raw_train_x, self.raw_train_y = raw_x_training[train_idx], raw_y_training[train_idx]
         self.val_x, self.val_y = raw_x_training[val_idx], raw_y_training[val_idx]
 
-        raw_x_test = dataset_np["test"]["img"].astype(np.float32) / 255.0
-        raw_y_test = dataset_np["test"]["label"].astype(np.int32)
+        raw_x_test = np.asarray(dataset_np["test"]["img"], dtype = np.int32) / 255.0
+        raw_y_test = np.asarray(dataset_np["test"]["label"], dtype = np.int32)
 
         self.test_x = raw_x_test[: self.num_test]
         self.test_y = raw_y_test[: self.num_test]
 
-        self._train_perm = rng.arange(self.num_train)
+        self._train_perm = np.arange(self.num_train)
         self._train_cursor = 0
 
         self.on_epoch_start(rng, augment=True)
