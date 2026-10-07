@@ -7,10 +7,10 @@ from flax import nnx
 from .config import load_settings
 from .data import Data
 from .logging import configure_logging
-from .model import LinearModel, NNXLinearModel
-from .plotting import compare_linear_models, plot_fit
+from .model import ResNetClassifier
 from .training import train
 
+EPOCHS = 15
 
 def main() -> None:
     """CLI entry point."""
@@ -19,41 +19,47 @@ def main() -> None:
     log = structlog.get_logger()
     log.info("Settings loaded", settings=settings.model_dump())
 
-    # JAX PRNG
     key = jax.random.key(settings.random_seed)
     data_key, model_key = jax.random.split(key)
     np_rng = np.random.default_rng(np.asarray(jax.random.key_data(data_key)))
+    nnx_rng = nnx.Rngs(model_key)
 
-    data_generating_model = LinearModel(
-        weights=np_rng.integers(low=0, high=5, size=(settings.data.num_features)),
-        bias=2,
+    data = Data(rng=np_rng)
+
+    model = ResNetClassifier(
+        input_channels=3,
+        stage_channels=(16, 32, 64),
+        blocks_per_stage=(2, 2, 2),
+        num_classes=10,
+        num_groups=8,
+        rngs=nnx_rng,
     )
-    log.debug("Data generating model", model=data_generating_model)
+    log.debug("ResNetClassifier Initialized")
 
-    data = Data(
-        model=data_generating_model,
-        rng=np_rng,
-        num_features=settings.data.num_features,
-        num_samples=settings.data.num_samples,
-        sigma=settings.data.sigma_noise,
+    steps_per_epoch = int(np.ceil(data.num_train / settings.training.batch_size))
+    total_steps = EPOCHS * steps_per_epoch
+    warmup_steps = 1 * steps_per_epoch  # 1 epoch linear warmup
+
+    schedule = optax.warmup_cosine_decay_schedule(
+        init_value=1e-5,
+        peak_value=settings.training.learning_rate,  # e.g., 1e-3 or 3e-3
+        warmup_steps=warmup_steps,
+        decay_steps=total_steps,
+        end_value=1e-5,
     )
 
-    model = NNXLinearModel(
-        rngs=nnx.Rngs(params=model_key), num_features=settings.data.num_features
+    optimizer_tx = optax.chain(
+        optax.clip_by_global_norm(1.0),
+        optax.adamw(learning_rate=schedule, weight_decay=1e-4),
     )
-    log.debug("Initial model", model=model.model)
+    optimizer = nnx.Optimizer(model, optimizer_tx, wrt=nnx.Param)
 
-    optimizer = nnx.Optimizer(
-        model, optax.adam(settings.training.learning_rate), wrt=nnx.Param
+    train(
+        model=model,
+        optimizer=optimizer,
+        data=data,
+        settings=settings.training,
+        np_rng=np_rng,
+        num_epochs=EPOCHS,
+        augment=True,
     )
-
-    train(model, optimizer, data, settings.training, np_rng)
-
-    log.debug("Trained model", model=model.model)
-
-    compare_linear_models(data.model, model.model)
-
-    if settings.data.num_features == 1:
-        plot_fit(model, data, settings.plotting)
-    else:
-        log.info("Skipping plotting for multi-feature models.")
