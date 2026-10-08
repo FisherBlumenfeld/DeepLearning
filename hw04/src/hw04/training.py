@@ -12,16 +12,17 @@ from .model import ResNetClassifier
 
 log = structlog.get_logger()
 
+
 @nnx.jit
 def train_step(
-    model: ResNetClassifier,
+    model: nnx.Module,
     optimizer: nnx.Optimizer,
     x: jnp.ndarray,
     y: jnp.ndarray,
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
     """Performs a single training step."""
 
-    def loss_fn(model: ResNetClassifier):
+    def loss_fn(model: nnx.Module):
         logits = model(x)
         loss = optax.softmax_cross_entropy_with_integer_labels(
             logits=logits, labels=y
@@ -35,14 +36,14 @@ def train_step(
 
 
 def train(
-    model: ResNetClassifier,
+    model: nnx.Module,
     optimizer: nnx.Optimizer,
     data: Data,
     settings: TrainingSettings,
     np_rng: np.random.Generator,
     num_epochs: int,
     augment: bool = True,
-) -> dict[str, list[float]]:
+) -> tuple[dict[str, list[float]], float]:
     """Train the model across epochs and report progress.
 
     Returns history dictionary for plotting learning curves.
@@ -109,7 +110,7 @@ def train(
             f"  Val   Acc: {val_acc * 100:.2f}% | Val   Loss: {val_loss:.4f}\n"
         )
 
-    #evaluate on test data to find actual accuracy
+    # evaluate on test data to find actual accuracy
     print("Evaluating on test set...")
     test_acc, test_loss = evaluate(
         model, data, split="test", batch_size=settings.batch_size, np_rng=np_rng
@@ -120,4 +121,4 @@ def train(
     print(f"Final Test Loss:     {test_loss:.4f}")
     print("========================================\n")
 
-    return history
+    return history, test_acc

@@ -7,9 +7,10 @@ from flax import nnx
 from .data import Data
 from .model import ResNetClassifier
 
+
 @nnx.jit
 def eval_step(
-    model: ResNetClassifier, x: jnp.ndarray, y: jnp.ndarray
+    model: nnx.Module, x: jnp.ndarray, y: jnp.ndarray
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
     """Computes validation/test accuracy and loss WITHOUT gradient updates."""
     logits = model(x)
@@ -21,7 +22,7 @@ def eval_step(
 
 
 def evaluate(
-    model: ResNetClassifier,
+    model: nnx.Module,
     data: Data,
     split: Literal["train", "validation", "test"],
     batch_size: int,

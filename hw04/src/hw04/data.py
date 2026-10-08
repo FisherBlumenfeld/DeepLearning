@@ -10,6 +10,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
 logging.getLogger("datasets").setLevel(logging.WARNING)
 
+
 @dataclass
 class Data:
     """Imports CIFAR 10 dataset from hugging face datasets, gives batches of each subset"""
@@ -21,25 +22,25 @@ class Data:
 
     raw_train_x: np.ndarray = field(init=False)
     raw_train_y: np.ndarray = field(init=False)
-    augmented_train_x: np.ndarray = field(init=False) #with flipping and padded cropping
+    augmented_train_x: np.ndarray = field(
+        init=False
+    )  # with flipping and padded cropping
     augmented_train_y: np.ndarray = field(init=False)
     val_x: np.ndarray = field(init=False)
     val_y: np.ndarray = field(init=False)
     test_x: np.ndarray = field(init=False)
     test_y: np.ndarray = field(init=False)
-    augment: bool = True
 
     _train_perm: np.ndarray = field(init=False)
     _train_cursor: int = field(init=False, default=0)
 
-    def __post_init__(self, rng: np.random.Generator, augment: bool):
-        self.augment = augment
+    def __post_init__(self, rng: np.random.Generator):
         print("Loading Data")
         dataset = load_dataset("uoft-cs/cifar10")
         dataset_np = dataset.with_format("numpy")
 
-        raw_x_training = np.asarray(dataset_np["train"]["img"], dtype = np.int32) / 255.0
-        raw_y_training = np.asarray(dataset_np["train"]["label"], dtype = np.int32)
+        raw_x_training = np.asarray(dataset_np["train"]["img"], dtype=np.int32) / 255.0
+        raw_y_training = np.asarray(dataset_np["train"]["label"], dtype=np.int32)
 
         total_train_samples = len(raw_x_training)
 
@@ -47,11 +48,14 @@ class Data:
         train_idx = perm[: self.num_train]
         val_idx = perm[self.num_train : self.num_train + self.num_val]
 
-        self.raw_train_x, self.raw_train_y = raw_x_training[train_idx], raw_y_training[train_idx]
+        self.raw_train_x, self.raw_train_y = (
+            raw_x_training[train_idx],
+            raw_y_training[train_idx],
+        )
         self.val_x, self.val_y = raw_x_training[val_idx], raw_y_training[val_idx]
 
-        raw_x_test = np.asarray(dataset_np["test"]["img"], dtype = np.int32) / 255.0
-        raw_y_test = np.asarray(dataset_np["test"]["label"], dtype = np.int32)
+        raw_x_test = np.asarray(dataset_np["test"]["img"], dtype=np.int32) / 255.0
+        raw_y_test = np.asarray(dataset_np["test"]["label"], dtype=np.int32)
 
         self.test_x = raw_x_test[: self.num_test]
         self.test_y = raw_y_test[: self.num_test]
@@ -59,7 +63,7 @@ class Data:
         self._train_perm = np.arange(self.num_train)
         self._train_cursor = 0
 
-        self.on_epoch_start(rng, augment=self.augment)
+        self.on_epoch_start(rng, augment=False)
 
     def on_epoch_start(self, rng: np.random.Generator, augment: bool = True):
         """

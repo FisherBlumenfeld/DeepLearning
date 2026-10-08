@@ -2,6 +2,7 @@ import jax.numpy as jnp
 from flax import nnx
 from typing import Sequence, Union
 
+
 class GroupNorm(nnx.Module):
     def __init__(
         self,
@@ -37,6 +38,7 @@ class GroupNorm(nnx.Module):
 
         return x_norm * self.scale.value + self.bias.value
 
+
 class ResidualBlock(nnx.Module):
     """
     Standard residual block with two 3x3 Conv2d layers and GroupNorm, including ID shortcut
@@ -61,7 +63,9 @@ class ResidualBlock(nnx.Module):
             use_bias=False,
             rngs=rngs,
         )
-        self.norm1 = GroupNorm(num_features=out_features, num_groups=num_groups, rngs=rngs)
+        self.norm1 = GroupNorm(
+            num_features=out_features, num_groups=num_groups, rngs=rngs
+        )
 
         self.conv2 = nnx.Conv(
             in_features=out_features,
@@ -72,7 +76,9 @@ class ResidualBlock(nnx.Module):
             use_bias=False,
             rngs=rngs,
         )
-        self.norm2 = GroupNorm(num_features=out_features, num_groups=num_groups, rngs=rngs)
+        self.norm2 = GroupNorm(
+            num_features=out_features, num_groups=num_groups, rngs=rngs
+        )
 
         if stride != 1 or in_features != out_features:
             self.shortcut = nnx.Conv(
@@ -84,7 +90,9 @@ class ResidualBlock(nnx.Module):
                 use_bias=False,
                 rngs=rngs,
             )
-            self.shortcut_norm = GroupNorm(num_features=out_features, num_groups=num_groups, rngs=rngs)
+            self.shortcut_norm = GroupNorm(
+                num_features=out_features, num_groups=num_groups, rngs=rngs
+            )
         else:
             self.shortcut = None
             self.shortcut_norm = None
@@ -101,9 +109,11 @@ class ResidualBlock(nnx.Module):
 
         if self.shortcut is not None:
             identity = self.shortcut(identity)
-            identity = self.shortcut_norm(identity)
+            if self.shortcut_norm is not None:
+                identity = self.shortcut_norm(identity)
 
         return nnx.relu(out + identity)
+
 
 class ResNetClassifier(nnx.Module):
     """Residual network classifier for CIFAR-10.
@@ -132,12 +142,16 @@ class ResNetClassifier(nnx.Module):
             use_bias=False,
             rngs=rngs,
         )
-        self.stem_norm = GroupNorm(num_features=stem_channels, num_groups=num_groups, rngs=rngs)
+        self.stem_norm = GroupNorm(
+            num_features=stem_channels, num_groups=num_groups, rngs=rngs
+        )
 
         blocks = []
         in_c = stem_channels
 
-        for stage_idx, (out_c, num_b) in enumerate(zip(stage_channels, blocks_per_stage)):
+        for stage_idx, (out_c, num_b) in enumerate(
+            zip(stage_channels, blocks_per_stage)
+        ):
             for b_idx in range(num_b):
                 stride = 2 if (stage_idx > 0 and b_idx == 0) else 1
                 blocks.append(
@@ -171,6 +185,7 @@ class ResNetClassifier(nnx.Module):
         x = jnp.mean(x, axis=(1, 2))
 
         return self.head(x)
+
 
 class Conv2d(nnx.Module):
     """A convolutional layer inheriting nnx.Conv. Uses ReLU as activation function"""
@@ -238,7 +253,7 @@ class BaselineClassifier(nnx.Module):
                 layer_channels[i]
             )  # ensure next layer's input matches previous layer's output
 
-        self.layers = layers
+        self.layers = nnx.List(layers)
 
         self.head = nnx.Linear(
             in_features=layer_channels[-1],
