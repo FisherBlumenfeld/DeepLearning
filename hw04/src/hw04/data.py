@@ -27,11 +27,13 @@ class Data:
     val_y: np.ndarray = field(init=False)
     test_x: np.ndarray = field(init=False)
     test_y: np.ndarray = field(init=False)
+    augment: bool = True
 
     _train_perm: np.ndarray = field(init=False)
     _train_cursor: int = field(init=False, default=0)
 
-    def __post_init__(self, rng: np.random.Generator):
+    def __post_init__(self, rng: np.random.Generator, augment: bool):
+        self.augment = augment
         print("Loading Data")
         dataset = load_dataset("uoft-cs/cifar10")
         dataset_np = dataset.with_format("numpy")
@@ -57,7 +59,7 @@ class Data:
         self._train_perm = np.arange(self.num_train)
         self._train_cursor = 0
 
-        self.on_epoch_start(rng, augment=True)
+        self.on_epoch_start(rng, augment=self.augment)
 
     def on_epoch_start(self, rng: np.random.Generator, augment: bool = True):
         """

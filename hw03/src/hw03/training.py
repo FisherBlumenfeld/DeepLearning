@@ -76,7 +76,7 @@ def train(
     settings: TrainingSettings,
     np_rng: np.random.Generator,
     num_epochs: int,
-) -> None:
+):
     """Train the model across epochs and report progress using print statements."""
 
     total_batches = int(np.ceil(data.num_train / settings.batch_size))
@@ -136,3 +136,5 @@ def train(
     print(f"Final Test Accuracy: {test_acc * 100:.2f}%")
     print(f"Final Test Loss:     {test_loss:.4f}")
     print("========================================\n")
+
+    return test_acc
