@@ -1,0 +1,20 @@
+debug = false
+random_seed = 31415
+
+[data]
+dataset_name = "mteb/banking77"
+embedding_model = "hotchpotch/bekko-embedding-v1-a8m"
+num_classes = 77
+embedding_dim = 384
+matryoshka_dims = [384, 256, 128, 64]
+
+[training]
+batch_size = 64
+num_epochs = 20
+learning_rate = 0.001
+checkpoint_dir = "checkpoints"
+
+[plotting]
+output_dir = "artifacts"
+figsize = [6, 4]
+dpi = 200
