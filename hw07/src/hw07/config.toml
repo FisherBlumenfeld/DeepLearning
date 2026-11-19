@@ -1,0 +1,27 @@
+debug = false
+random_seed = 31415
+
+[data]
+dataset_name = "mteb/banking77"
+embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_dim = 384
+num_classes = 77
+embedding_batch_size = 128
+
+[training]
+batch_size = 256
+num_epochs = 40
+learning_rate = 0.001
+l1_coefficient = 0.001
+checkpoint_dir = "artifacts/checkpoints"
+
+[experiments]
+latent_dims = [384, 768, 1536]
+sample_sizes = [512, 2048, 8192]
+top_k_examples = 8
+near_dead_fraction_threshold = 0.001
+
+[plotting]
+output_dir = "artifacts"
+figsize = [14, 4]
+dpi = 180
