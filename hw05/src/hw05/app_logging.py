@@ -5,9 +5,12 @@ import sys
 from typing import Any
 import numpy as np
 import structlog
+from collections.abc import MutableMapping
 
 
-def custom_serializer_processor(logger: Any, method_name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
+def custom_serializer_processor(
+    logger: Any, method_name: str, event_dict: MutableMapping[str, Any]
+) -> MutableMapping[str, Any]:
     """Formats special types like NumPy arrays and floats for clean logging output."""
     for key, value in event_dict.items():
         if isinstance(value, (np.floating, float)):

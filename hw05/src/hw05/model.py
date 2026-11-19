@@ -8,7 +8,7 @@ from flax import nnx
 
 class MLPClassifier(nnx.Module):
     """Multi-Layer Perceptron (MLP) intent classifier built with Flax NNX.
-    
+
     Supports dynamic input embedding dimensions to accommodate Matryoshka
     Representation Learning evaluation across truncated dimensions d in {384, 256, 128, 64}.
     """
@@ -23,7 +23,7 @@ class MLPClassifier(nnx.Module):
         dropout_rate: float = 0.1,
     ):
         """Initializes the MLP classifier layers.
-        
+
         Args:
             rngs: Flax NNX PRNG key generator.
             input_dim: Input embedding feature dimension (default: 384).
@@ -39,24 +39,26 @@ class MLPClassifier(nnx.Module):
 
         layers = []
         dropouts = []
-        
+
         prev_dim = input_dim
         for h_dim in hidden_dims:
             layers.append(nnx.Linear(prev_dim, h_dim, rngs=rngs))
-            dropouts.append(nnx.Dropout(dropout_rate, rngs=rngs) if dropout_rate > 0 else None)
+            dropouts.append(
+                nnx.Dropout(dropout_rate, rngs=rngs) if dropout_rate > 0 else None
+            )
             prev_dim = h_dim
 
-        self.layers = layers
-        self.dropouts = dropouts
+        self.layers = nnx.List(layers)
+        self.dropouts = nnx.List(dropouts)
         self.head = nnx.Linear(prev_dim, num_classes, rngs=rngs)
 
     def __call__(self, x: jax.Array, *, deterministic: bool = True) -> jax.Array:
         """Forward pass computing class logits.
-        
+
         Args:
             x: Input feature array of shape (batch_size, input_dim).
             deterministic: If True, disables dropout for evaluation.
-            
+
         Returns:
             Unnormalized logits of shape (batch_size, num_classes).
         """

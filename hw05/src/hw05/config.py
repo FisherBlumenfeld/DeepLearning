@@ -22,7 +22,7 @@ def _find_config_toml() -> Path:
 
 
 class DataSettings(BaseModel):
-    """Settings for data generation."""
+    """Settings for dataset loading and embeddings."""
 
     num_features: int = Field(
         default=1, gt=0, description="Number of feature dimensions"
@@ -33,6 +33,22 @@ class DataSettings(BaseModel):
     sigma_noise: float = Field(
         default=0.5, ge=0.0, description="Standard deviation of Gaussian noise"
     )
+
+    embedding_model: str = Field(
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        description="Hugging Face embedding model",
+    )
+    embedding_dim: int = Field(
+        default=384, gt=0, description="Dimension of embedding vectors"
+    )
+    dataset_name: str = Field(
+        default="mteb/banking77",
+        description="Hugging Face dataset identifier",
+    )
+    num_classes: int = Field(
+        default=77, gt=0, description="Number of Banking77 intent classes"
+    )
+    matryoshka_dims: list[int] = [384, 256, 128, 64, 32]
 
 
 class TrainingSettings(BaseModel):
@@ -45,6 +61,8 @@ class TrainingSettings(BaseModel):
     learning_rate: float = Field(
         default=0.1, gt=0.0, description="Learning rate for Adam optimizer"
     )
+    checkpoint_dir: Path = Path("checkpoints")
+    num_epochs: int = 10
 
 
 class PlottingSettings(BaseModel):

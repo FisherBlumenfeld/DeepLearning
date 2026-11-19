@@ -38,12 +38,13 @@ def train_step(
     y: jax.Array,
 ) -> Tuple[jax.Array, jax.Array]:
     """Executes a single JIT-compiled training step with gradient updates."""
+
     def loss_fn(m: MLPClassifier):
         return compute_loss_and_accuracy(m, x, y, deterministic=False)
 
     grad_fn = nnx.value_and_grad(loss_fn, has_aux=True)
     (loss, accuracy), grads = grad_fn(model)
-    optimizer.update(grads)
+    optimizer.update(model, grads)
     return loss, accuracy
 
 
@@ -76,6 +77,12 @@ def evaluate_dataset(
         batch_x = dataset.x[i:end_idx]
         if truncate_dim is not None:
             batch_x = batch_x[:, :truncate_dim]
+            if truncate_dim < dataset.x.shape[1]:
+                batch_x = np.pad(
+                    batch_x,
+                    ((0, 0), (0, dataset.x.shape[1] - truncate_dim)),
+                    mode="constant",
+                )
         batch_y = dataset.y[i:end_idx]
 
         x_jax = jnp.array(batch_x)
@@ -98,15 +105,29 @@ def save_checkpoint(
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_path = checkpoint_dir / f"checkpoint_epoch_{epoch:03d}.npz"
 
-    # Extract NNX graph state
+    # Extract the model's NNX state as a regular nested dictionary.
     _, state = nnx.split(model)
-    flat_state = state.to_flat_dict()
+    pure_state = nnx.to_pure_dict(state)
 
-    # Convert JAX state arrays to portable NumPy dictionary
-    np_state = {
-        "/".join(map(str, k)): np.array(v)
-        for k, v in flat_state.items()
-    }
+    # Recursively flatten nested dictionaries into NPZ-compatible arrays.
+    np_state = {}
+
+    def flatten_dict(mapping, prefix=""):
+        for key, value in mapping.items():
+            name = f"{prefix}/{key}" if prefix else str(key)
+
+            if isinstance(value, dict):
+                flatten_dict(value, name)
+            else:
+                if hasattr(value, "dtype") and jax.dtypes.issubdtype(
+                    value.dtype, jax.dtypes.prng_key
+                ):
+                    value = jax.random.key_data(value)
+
+                np_state[name] = np.asarray(value)
+
+    flatten_dict(pure_state)
+
     np.savez(checkpoint_path, **np_state)
     log.info("Checkpoint saved", epoch=epoch, path=str(checkpoint_path))
     return checkpoint_path
@@ -124,7 +145,10 @@ def train(
     history = []
     settings.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    steps_per_epoch = max(1, train_dataset.num_samples // settings.batch_size)
+    steps_per_epoch = max(
+        1,
+        (train_dataset.num_samples + settings.batch_size - 1) // settings.batch_size,
+    )
     log.info(
         "Starting training loop",
         epochs=settings.num_epochs,
@@ -137,7 +161,8 @@ def train(
         epoch_accuracies = []
 
         for _ in range(steps_per_epoch):
-            batch_x, batch_y = train_dataset.get_batch(rng, settings.batch_size)
+            batch_size = min(settings.batch_size, train_dataset.num_samples)
+            batch_x, batch_y = train_dataset.get_batch(rng, batch_size)
             x_jax = jnp.array(batch_x)
             y_jax = jnp.array(batch_y)
 
@@ -149,7 +174,9 @@ def train(
         train_acc = float(np.mean(epoch_accuracies))
 
         # Evaluate on validation split
-        val_loss, val_acc = evaluate_dataset(model, val_dataset, batch_size=settings.batch_size)
+        val_loss, val_acc = evaluate_dataset(
+            model, val_dataset, batch_size=settings.batch_size
+        )
 
         # Save epoch checkpoint
         ckpt_path = save_checkpoint(model, epoch, settings.checkpoint_dir)
